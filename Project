@@ -1,0 +1,308 @@
+class Book {
+
+    String title;
+    String author;
+    String genre;
+    boolean available;
+
+    public Book(String title, String author, String genre) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.available = true;
+    }
+
+    public void getDetails() {
+        System.out.println("Title: " + title + ", Author: " + author + ", Genre: " + genre);
+    }
+}
+
+class Member {
+
+    String name;
+    List<Book> borrowedBook;
+
+    public Member(String name) {
+        this.name = name;
+        this.borrowedBook = new ArrayList<>();
+    }
+
+    public boolean borrowBook(Book book) {
+        if (borrowedBook.size() < 5 && book.available) {
+            borrowedBook.add(book);
+            book.available = false;
+            return true;
+        }
+        return false;
+    }
+
+    public void returnBook(Book b) {
+        borrowedBook.remove(b);
+        b.available = true;
+    }
+
+    public void getDetails() {
+        System.out.println("User name: " + name + ", Borrowed books: " + borrowedBook.size());
+    }
+}
+
+public class LMsystem {
+
+    static Scanner sc = new Scanner(System.in);
+    static List<Book> Books = new ArrayList<>();
+    static List<Member> Members = new ArrayList<>();
+
+    static final String adminusername = "admin";
+    static final String password = "password";
+
+    static Member loginmember = null;
+
+    public static void main(String args[]) {
+
+        Book b1 = new Book("Maths", "Thomas", "Education");
+        Book b2 = new Book("Science", "Trady", "Education");
+
+        Books.add(b1);
+        Books.add(b2);
+
+        while (true) {
+            System.out.println("Enter role(Admin/User): ");
+            String role = sc.nextLine();
+
+            if (role.equals("admin")) {
+                longinAsAdmin();
+            } else if (role.equals("user")) {
+                loginAsUser();
+            } else {
+                System.out.println("Invalid role.");
+            }
+        }
+    }
+
+    private static void longinAsAdmin() {
+        System.out.println("Enter admin name: ");
+        String name = sc.nextLine();
+
+        System.out.println("Enter password: ");
+        String pass = sc.nextLine();
+
+        if (name.equals(adminusername) && pass.equals(password)) {
+            System.out.println("Logged in as Admin.");
+            adminMenu();
+        } else {
+            System.out.println("Invalid admin username or password.");
+        }
+    }
+
+    private static void loginAsUser() {
+        System.out.print("Enter member name: ");
+        String name = sc.nextLine();
+
+        loginmember = findOrCreate(name);
+        System.out.println("Logged in as User.");
+        userMenu();
+    }
+
+    private static Member findOrCreate(String name) {
+        for (Member m : Members) {
+            if (m.name.equals(name)) {
+                return m;
+            }
+        }
+        Member m = new Member(name);
+        Members.add(m);
+        return m;
+    }
+
+    private static void adminMenu() {
+        while (true) {
+            System.out.println("\nLibrary Management System");
+            System.out.println("1. Add Book");
+            System.out.println("2. Update Book");
+            System.out.println("3. Remove Book");
+            System.out.println("4. Add Member");
+            System.out.println("5. Display All Books");
+            System.out.println("6. Display All Members");
+            System.out.println("7. Exit");
+
+            System.out.println("Enter your choice:");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    addBook();
+                    break;
+                case 2:
+                    updateBook();
+                    break;
+                case 3:
+                    removeBook();
+                    break;
+                case 4:
+                    addMember();
+                    break;
+                case 5:
+                    displayBook();
+                    break;
+                case 6:
+                    displayMember();
+                    break;
+                case 7:
+                    System.out.println("Exiting..");
+                    return;
+                default:
+                    System.out.println("Invalid");
+                    break;
+            }
+        }
+    }
+
+    public static void userMenu() {
+        while (true) {
+            System.out.println("\nLibrary Management System");
+            System.out.println("1. Borrow Book");
+            System.out.println("2. Return Book");
+            System.out.println("3. Display Books");
+            System.out.println("4. Display All Members");
+            System.out.println("5. Exit");
+
+            System.out.println("Enter your choice:");
+            int ch = sc.nextInt();
+            sc.nextLine();
+
+            switch (ch) {
+                case 1:
+                    borrowBook();
+                    break;
+                case 2:
+                    returnBook();
+                    break;
+                case 3:
+                    displayBook();
+                    break;
+                case 4:
+                    displayMember();
+                    break;
+                case 5:
+                    System.out.println("Exit...");
+                    return;
+                default:
+                    System.out.println("Invalid.");
+                    break;
+            }
+        }
+    }
+
+    private static void addBook() {
+        System.out.println("Enter Title:");
+        String title = sc.nextLine();
+
+        System.out.println("Enter Author:");
+        String author = sc.nextLine();
+
+        System.out.println("Enter Genre:");
+        String genre = sc.nextLine();
+
+        Book b = new Book(title, author, genre);
+        Books.add(b);
+        System.out.println("Book Added Successfully.");
+    }
+
+    private static void updateBook() {
+        System.out.println("Enter Title to Update:");
+        String title = sc.nextLine();
+
+        Book book = findbyTitle(title);
+
+        if (book != null) {
+            System.out.println("Enter New Author:");
+            book.author = sc.nextLine();
+
+            System.out.println("Enter New Genre:");
+            book.genre = sc.nextLine();
+
+            System.out.println("Book Updated Successfully.");
+        } else {
+            System.out.println("Invalid title.");
+        }
+    }
+
+    private static void removeBook() {
+        System.out.println("Enter Title to Remove:");
+        String title = sc.nextLine();
+
+        Book book = findbyTitle(title);
+
+        if (book != null) {
+            Books.remove(book);
+            System.out.println("Book Removed Successfully.");
+        } else {
+            System.out.println("Invalid title.");
+        }
+    }
+
+    private static Book findbyTitle(String title) {
+        for (Book b : Books) {
+            if (b.title.equalsIgnoreCase(title)) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    private static void addMember() {
+        System.out.println("Enter Name: ");
+        String name = sc.nextLine();
+        Member m = new Member(name);
+        Members.add(m);
+        System.out.println("Member Added Successfully.");
+    }
+
+    private static void displayBook() {
+        if (Books.isEmpty()) {
+            System.out.println("No Books Available.");
+        } else {
+            for (Book b : Books) {
+                b.getDetails();
+            }
+        }
+    }
+
+    private static void displayMember() {
+        if (Members.isEmpty()) {
+            System.out.println("No Members Available.");
+        } else {
+            for (Member m : Members) {
+                m.getDetails();
+            }
+        }
+    }
+
+    private static void borrowBook() {
+        System.out.println("Enter Title To Borrow: ");
+        String title = sc.nextLine();
+
+        Book book = findbyTitle(title);
+
+        if (book != null && loginmember.borrowBook(book)) {
+            System.out.println("Book Borrowed.");
+        } else {
+            System.out.println("Invalid or Book Unavailable.");
+        }
+    }
+
+    private static void returnBook() {
+        System.out.println("Enter Title To Return: ");
+        String title = sc.nextLine();
+
+        Book book = findbyTitle(title);
+
+        if (book != null && !book.available) {
+            loginmember.returnBook(book);
+            System.out.println("Book Returned.");
+        } else {
+            System.out.println("Invalid.");
+        }
+    }
+}
